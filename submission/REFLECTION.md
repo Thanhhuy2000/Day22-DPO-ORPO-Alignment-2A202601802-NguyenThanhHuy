@@ -2,7 +2,7 @@
 
 **Tên:** Nguyễn Thanh Huy
 **MSSV:** 2A202601802
-**Cohort:** _(điền lớp của bạn)_
+**Cohort:** K4-Track3
 **Tier đã chạy:** T4 (free Colab)
 **Date:** 2026-08-25
 
