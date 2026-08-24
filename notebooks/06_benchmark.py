@@ -224,6 +224,8 @@ def generate_with_adapter(adapter_path, prompts, max_new_tokens=256):
     model = PeftModel.from_pretrained(model, str(adapter_path))
     FastLanguageModel.for_inference(model)
 
+    eos_id = tokenizer.convert_tokens_to_ids("<|im_end|>")
+
     outputs = []
     for p in prompts:
         msgs = [{"role": "user", "content": p["prompt"]}]
@@ -231,7 +233,8 @@ def generate_with_adapter(adapter_path, prompts, max_new_tokens=256):
                                             add_generation_prompt=True).to("cuda")
         with torch.no_grad():
             out = model.generate(input_ids=inp, max_new_tokens=max_new_tokens,
-                                 do_sample=False, pad_token_id=tokenizer.eos_token_id)
+                                 do_sample=False, eos_token_id=eos_id,
+                                 pad_token_id=eos_id)
         outputs.append(tokenizer.decode(out[0][inp.shape[1]:], skip_special_tokens=True).strip())
 
     del model, tokenizer

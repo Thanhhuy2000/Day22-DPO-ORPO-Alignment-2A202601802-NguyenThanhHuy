@@ -108,6 +108,13 @@ def generate_with_adapter(adapter_path: Path, prompts: list[dict], max_new_token
     model = PeftModel.from_pretrained(model, str(adapter_path))
     FastLanguageModel.for_inference(model)
 
+    # Hand the stop token to generate() directly: setting it on
+    # model.generation_config is not enough, because PeftModel wrapping and
+    # for_inference() can replace that config afterwards, leaving eos back at
+    # <|endoftext|> — which a ChatML-trained model never emits, so every
+    # generation runs to max_new_tokens.
+    eos_id = tokenizer.convert_tokens_to_ids("<|im_end|>")
+
     outputs = []
     for p in prompts:
         messages = [{"role": "user", "content": p["prompt"]}]
@@ -119,8 +126,8 @@ def generate_with_adapter(adapter_path: Path, prompts: list[dict], max_new_token
                 input_ids=inputs,
                 max_new_tokens=max_new_tokens,
                 do_sample=False,             # deterministic for fair comparison
-                temperature=1.0,
-                pad_token_id=tokenizer.eos_token_id,
+                eos_token_id=eos_id,
+                pad_token_id=eos_id,
             )
         generated = tokenizer.decode(out[0][inputs.shape[1]:], skip_special_tokens=True)
         outputs.append(generated.strip())
