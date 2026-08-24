@@ -252,6 +252,12 @@ generated = tokenizer.decode(out[0][inputs.shape[1]:], skip_special_tokens=True)
 print(f"PROMPT: {prompt}\n")
 print(f"SFT-mini response:\n{generated}")
 
+# for_inference() above put the session on Unsloth's inference path, which lays
+# grouped-query attention out as 5D BMGHK. xformers has no backward kernel for
+# that layout on T4 (sm_75), so leaving it set makes NB3's DPO backward raise
+# NotImplementedError. Restore the training path before moving on.
+FastLanguageModel.for_training(model)
+
 # %% [markdown]
 # ## 5. Vibe-coding callout
 #

@@ -93,15 +93,18 @@ def ensure_chat_setup(tokenizer, model=None):
 
 ensure_chat_setup(tokenizer, model)
 
-# Stack SFT-mini → DPO adapters
-SFT_PATH = REPO_ROOT / "adapters" / "sft-mini"
-model = PeftModel.from_pretrained(model, str(SFT_PATH))
-print(f"Loaded SFT-mini adapter from {SFT_PATH}")
+# adapters/dpo is the SFT adapter carried forward through DPO (NB3 trains it in
+# place rather than stacking a second LoRA), so this one load is the whole
+# aligned policy. The previous version loaded adapters/sft-mini here and never
+# applied the DPO weights at all — the exported GGUF had no alignment in it.
+model = PeftModel.from_pretrained(model, str(DPO_PATH))
+print(f"Loaded SFT+DPO adapter from {DPO_PATH}")
 
 # %% [markdown]
-# > **Note:** The DPO adapter trained in NB3 stacks on top of SFT. To get a fully
-# > aligned merged model, we apply both adapters before merging. Unsloth's
-# > `save_pretrained_merged` handles the SFT + DPO + base merge in one shot.
+# > **Note:** NB3 trains the SFT adapter forward with the DPO objective instead
+# > of stacking a second LoRA, so `adapters/dpo` already contains SFT + DPO in
+# > one adapter. Unsloth's `save_pretrained_merged` folds it into the base in
+# > one shot.
 
 # %% [markdown]
 # ## 2. Save merged FP16 weights
@@ -111,7 +114,7 @@ print(f"Loaded SFT-mini adapter from {SFT_PATH}")
 # converter in step 3.
 
 # %%
-# This re-loads the model with both SFT and DPO adapters merged into base weights.
+# Folds the SFT+DPO adapter into the base weights.
 # Output is FP16 (or BF16 on Ampere+) HF-format weights ready for inference.
 model.save_pretrained_merged(
     str(MERGED_PATH),

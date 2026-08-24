@@ -119,30 +119,30 @@ model = PeftModel.from_pretrained(model, str(SFT_PATH), is_trainable=True)
 print(f"Policy: {model.__class__.__name__} with SFT adapter loaded")
 
 # %%
-# Wrap policy with NEW LoRA adapter for DPO updates (don't merge SFT — keep stacked)
-# Unsloth re-applies LoRA on top of the existing PeftModel.
-model = FastLanguageModel.get_peft_model(
-    model,
-    r=16,
-    lora_alpha=32,
-    lora_dropout=0.0,
-    bias="none",
-    target_modules=[
-        "q_proj", "k_proj", "v_proj", "o_proj",
-        "gate_proj", "up_proj", "down_proj",
-    ],
-    use_gradient_checkpointing="unsloth",
-    random_state=42,
-    use_rslora=False,
-    loftq_config=None,
-)
-print(f"Trainable params (DPO LoRA): {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+# Keep training the SFT adapter with the DPO objective instead of stacking a
+# second LoRA on top of it. The nested PeftModel was fragile, and TRL derives
+# the reference the same way either way — by disabling the adapter on the
+# frozen 4-bit base.
+#
+# for_training() is load-bearing, not decorative: NB1's sanity-check generation
+# calls for_inference(), which switches attention to the 5D BMGHK grouped-query
+# layout. xformers ships no memory_efficient_attention_backward kernel for that
+# layout on T4 (sm_75 — the flash backends need sm_80+, and cutlassB rejects
+# BMGHK), so without this the first backward pass dies with NotImplementedError.
+try:
+    FastLanguageModel.for_training(model, use_gradient_checkpointing="unsloth")
+except TypeError:                       # older signature takes the model only
+    FastLanguageModel.for_training(model)
+
+trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+print(f"Trainable params (DPO LoRA): {trainable:,}")
+assert trainable > 0, "SFT adapter is read-only — reload it with is_trainable=True"
 
 # %% [markdown]
 # > **Why no separate `ref_model=` argument?** Modern TRL (≥ 0.12) auto-detects
 # > PEFT models and uses the *base model without the adapter* as the reference.
-# > That's the same memory layout: 1 base + 2 adapter sets in VRAM. No deepcopy
-# > needed.
+# > That's 1 base + 1 adapter set in VRAM — no deepcopy, no second copy of the
+# > weights.
 
 # %% [markdown]
 # ## 2. Build DPOConfig (deck §5.2 hyperparameters)
