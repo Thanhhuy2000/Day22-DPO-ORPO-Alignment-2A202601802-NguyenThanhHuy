@@ -15,7 +15,7 @@
 | GPU | ⟵ điền từ `01-setup-gpu.png` (hàng "GPU") |
 | CUDA / driver | ⟵ điền từ `01-setup-gpu.png` (hàng "torch / CUDA") |
 | Base model | `unsloth/Qwen2.5-3B-bnb-4bit` |
-| SFT dataset slice | `5CD-AI/Vietnamese-alpaca-cleaned` · 1000 samples · 1 epoch |
+| SFT dataset slice | `5CD-AI/Vietnamese-alpaca-gpt4-gg-translated` · 1000 samples · 1 epoch |
 | Preference dataset slice | `argilla/ultrafeedback-binarized-preferences-cleaned` · 1000 pairs · 1 epoch |
 | `COMPUTE_TIER` env | T4 |
 | Total cost | $0 (free Colab T4) |
