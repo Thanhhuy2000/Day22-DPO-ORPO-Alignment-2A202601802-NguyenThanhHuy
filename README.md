@@ -226,7 +226,7 @@ Full provocations: [`BONUS-CHALLENGE.md`](BONUS-CHALLENGE.md) (tiếng Việt) �
 | `chosen_rewards` không tăng | Bình thường ở 100 step đầu. Sau 500 step nếu vẫn flat → giảm `beta` 0.1 → 0.05 hoặc tăng `lr` 5e-7 → 1e-6 |
 | `chosen_rewards` *giảm* mà reward gap *tăng* | Đó là **likelihood displacement** (deck §3.4). Bình thường ở DPO; ghi vào REFLECTION § "β trade-off" |
 | `RuntimeError: padding token is not set` | Add `tokenizer.pad_token = tokenizer.eos_token` trước khi tạo trainer |
-| NB3 `NotImplementedError` on `memory_efficient_attention_backward` | NB1's sanity cell left the session in inference mode (5D BMGHK attention); xformers has no backward kernel for it on T4. Call `FastLanguageModel.for_training(model)` before building the DPOTrainer. |
+| NB3 `NotImplementedError` on `memory_efficient_attention_backward` | On T4 (sm_75) xformers has no backward kernel for Qwen's 5D BMGHK grouped-query layout. `pip uninstall -y xformers` **before** importing unsloth — attention then falls back to torch SDPA. The Colab notebooks do this automatically on pre-Ampere GPUs. |
 | NB1 `ValueError: tokenizer.chat_template is not set` | `Qwen2.5-*-bnb-4bit` is a *base* checkpoint — only the Instruct variant ships ChatML. `ensure_chat_setup()` in NB1 installs a minimal ChatML template and switches `eos` to `<\|im_end\|>`. |
 | NB1 `DatasetNotFoundError` on the SFT dataset | `5CD-AI/Vietnamese-alpaca-cleaned` does not exist on the Hub. Use `5CD-AI/Vietnamese-alpaca-gpt4-gg-translated` (bilingual `*_vi` / `*_en` columns). |
 | Unsloth + TRL version mismatch | Pin: `unsloth>=2025.10 trl>=0.12,<0.20`. Nếu lỗi sau Unsloth update, downgrade Unsloth |
