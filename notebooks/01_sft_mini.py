@@ -80,10 +80,35 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit=True,
 )
 
-# Critical for batch training — Qwen tokenizers ship without pad token.
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
-    print("Set tokenizer.pad_token = eos_token")
+# Qwen2.5 *base* ships no chat template and eos=<|endoftext|> — only the Instruct
+# variant has ChatML. <|im_start|>/<|im_end|> are already in the base vocab
+# (151644/151645), so install a minimal ChatML template and make <|im_end|> the
+# stop token; otherwise apply_chat_template raises and generation never halts.
+CHATML_TEMPLATE = (
+    r"{% for message in messages %}"
+    r"{{ '<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n' }}"
+    r"{% endfor %}"
+    r"{% if add_generation_prompt %}"
+    r"{{ '<|im_start|>assistant\n' }}"
+    r"{% endif %}"
+)
+
+
+def ensure_chat_setup(tokenizer, model=None):
+    if not getattr(tokenizer, "chat_template", None):
+        tokenizer.chat_template = CHATML_TEMPLATE
+    tokenizer.eos_token = "<|im_end|>"
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    if model is not None and getattr(model, "generation_config", None) is not None:
+        model.generation_config.eos_token_id = tokenizer.eos_token_id
+        model.generation_config.pad_token_id = tokenizer.pad_token_id
+    return tokenizer
+
+
+ensure_chat_setup(tokenizer, model)
+print(f"chat_template: {'set' if tokenizer.chat_template else 'MISSING'}   "
+      f"eos={tokenizer.eos_token}   pad={tokenizer.pad_token}")
 
 # %%
 model = FastLanguageModel.get_peft_model(
