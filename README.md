@@ -11,7 +11,7 @@ Build SFT-mini checkpoint → train DPO adapter → compare SFT-only vs SFT+DPO 
 
 | Tier | Compute | Base model | SFT slice | DPO slice | Time | Khi nào dùng |
 |---|---|---|---|---|---|---|
-| **T4 (default)** | Free Colab T4 16 GB / laptop GPU ≥ 12 GB | `Qwen2.5-3B-bnb-4bit` | 1k VN Alpaca | 2k UltraFeedback | ~30 min core (NB1-4) | Hầu hết học viên — không Anthropic/OpenAI key, free Colab, RTX 3060/3070/4060 laptop |
+| **T4 (default)** | Free Colab T4 16 GB / laptop GPU ≥ 12 GB | `Qwen2.5-3B-bnb-4bit` | 1k VN Alpaca | 1k UltraFeedback | ~30 min core (NB1-4) | Hầu hết học viên — không Anthropic/OpenAI key, free Colab, RTX 3060/3070/4060 laptop |
 | **BigGPU (full)** | Colab Pro A100/L4 / Kaggle T4×2 / cloud H100 | `Qwen2.5-7B-bnb-4bit` | 1k VN Alpaca | 5k UltraFeedback | ~25 min core (NB1-4) | Đã có cloud GPU, muốn faithful với deck demo (3.2 → 4.1 helpfulness, A100 timing) |
 
 > Cả hai tier dùng **cùng notebook source** — đổi giữa T4 và BigGPU bằng cách sửa `COMPUTE_TIER` trong `.env` (hoặc đổi badge launch URL bên dưới).
@@ -24,15 +24,15 @@ Build SFT-mini checkpoint → train DPO adapter → compare SFT-only vs SFT+DPO 
 
 **Option 1: Free Colab (zero install)**
 
-[![Open T4 in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<your-username>/Day22-Track3-DPO-Alignment-Lab/blob/main/colab/Lab22_DPO_T4.ipynb)
+[![Open T4 in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Thanhhuy2000/Day22-DPO-ORPO-Alignment-2A202601802-NguyenThanhHuy/blob/main/colab/Lab22_DPO_T4.ipynb)
 
 Click → Runtime → Change runtime type → **T4 GPU** → Run all.
 
 **Option 2: Local laptop (≥ 12 GB VRAM)**
 
 ```bash
-git clone https://github.com/<your-username>/K4-Track3-Day22-DPO-ORPO-Alignment.git
-cd K4-Track3-Day22-DPO-ORPO-Alignment
+git clone https://github.com/Thanhhuy2000/Day22-DPO-ORPO-Alignment-2A202601802-NguyenThanhHuy.git
+cd Day22-DPO-ORPO-Alignment-2A202601802-NguyenThanhHuy
 bash setup-laptop.sh    # ~5 min — venv + deps + cuda probe + smoke test
 make smoke              # import + GPU check (no training)
 make pipeline           # CORE: sft → data → dpo → eval (NB1-4, ~30 min)
@@ -244,7 +244,7 @@ Full provocations: [`BONUS-CHALLENGE.md`](BONUS-CHALLENGE.md) (tiếng Việt) �
 1. **Fork hoặc copy repo này lên GitHub account của bạn**, set repo **public**.
    ```bash
    git init -b main
-   git remote add origin https://github.com/<your-username>/K4-Track3-Day22-DPO-ORPO-Alignment.git
+   git remote add origin https://github.com/Thanhhuy2000/Day22-DPO-ORPO-Alignment-2A202601802-NguyenThanhHuy.git
    ```
 2. Hoàn thành 5 notebooks (giữ output cells trong `.ipynb`).
 3. Add ảnh chụp vào `submission/screenshots/` (xem [`submission/screenshots/README.md`](submission/screenshots/README.md) để biết list 6+3).

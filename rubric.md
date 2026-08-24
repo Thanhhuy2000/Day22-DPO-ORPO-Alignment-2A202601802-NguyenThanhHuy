@@ -72,7 +72,7 @@ See [`BONUS-CHALLENGE.md`](BONUS-CHALLENGE.md) — completely separate, no point
 
 **No PR. Submit a public GitHub URL into the VinUni LMS Day-22 box.**
 
-1. Push your work to `<your-username>/Day22-Track3-DPO-Alignment-Lab` (forked or fresh repo — both fine), set repo **public**.
+1. Push your work to `Thanhhuy2000/Day22-DPO-ORPO-Alignment-2A202601802-NguyenThanhHuy` (forked or fresh repo — both fine), set repo **public**.
 2. Include:
    - 5 executed notebooks (`.ipynb` with output cells preserved) OR a single executed `colab/Lab22_DPO_T4.ipynb` if you used the Colab path
    - `submission/screenshots/` — 6 required + 3 optional images
